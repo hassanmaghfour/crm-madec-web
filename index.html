@@ -1,1 +1,78 @@
-<h1>CRM MADEC</h1>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM MADEC - Connexion</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      text-align: center;
+      padding: 30px;
+    }
+    .logo {
+      max-width: 200px;
+      margin-bottom: 20px;
+    }
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    input[type="text"], input[type="password"] {
+      padding: 10px;
+      margin: 10px;
+      width: 80%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #0071ce;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005ba1;
+    }
+  </style>
+</head>
+<body>
+  <img src="logo-madec.png" alt="Logo MADEC" class="logo" />
+  <div class="container">
+    <h2>Connexion au CRM MADEC</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Nom d'utilisateur" required /><br />
+      <input type="password" id="password" placeholder="Mot de passe" required /><br />
+      <button type="submit">Se connecter</button>
+    </form>
+    <p id="message" style="color: red;"></p>
+  </div>
+
+  <script>
+    const users = {
+      "khadija": { password: "1234", role: "operateur" },
+      "soufiane": { password: "souf2025", role: "operateur" },
+      "hanane": { password: "hananeCRM", role: "operateur" },
+      "admin": { password: "admin2025", role: "superviseur" }
+    };
+
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      if (users[username] && users[username].password === password) {
+        window.location.href = `formulaire_${users[username].role}.html`;
+      } else {
+        document.getElementById("message").textContent = "Identifiants incorrects";
+      }
+    });
+  </script>
+</body>
+</html>
