@@ -86,6 +86,30 @@
   </form>
 
   <script>
+    const sheetURL = "https://docs.google.com/spreadsheets/d/1jIRZWacQBnuqfMmlELxSjeRjDY58xghq/gviz/tq?tqx=out:json";
+
+    let referentielClients = {};
+
+    function chargerReferentiel() {
+      fetch(sheetURL)
+        .then(res => res.text())
+        .then(data => {
+          const json = JSON.parse(data.substr(47).slice(0, -2));
+          json.table.rows.forEach(row => {
+            const code = row.c[0]?.v;
+            const nom = row.c[1]?.v;
+            if (code && nom) referentielClients[code] = nom;
+          });
+        });
+    }
+
+    document.getElementById("codeClient").addEventListener("input", function () {
+      const code = this.value.trim();
+      document.getElementById("nomClient").value = referentielClients[code] || "";
+    });
+
+    chargerReferentiel();
+
     document.querySelector("form").addEventListener("submit", function(e) {
       e.preventDefault();
 
@@ -109,6 +133,7 @@
       .then(data => {
         alert("✅ Interaction enregistrée !");
         document.getElementById("crmForm").reset();
+        document.getElementById("nomClient").value = "";
       })
       .catch(error => {
         alert("❌ Erreur : " + error.message);
