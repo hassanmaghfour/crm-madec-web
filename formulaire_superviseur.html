@@ -1,29 +1,144 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM MADEC - Superviseur</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRM MADEC - Opérateur</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
+      background-color: #f9f9f9;
       padding: 30px;
+      max-width: 600px;
+      margin: auto;
     }
     h2 {
-      text-align: center;
       color: #0071ce;
     }
-    iframe {
-      border: none;
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, select, textarea {
       width: 100%;
-      height: 80vh;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
       margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #0071ce;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005ba1;
     }
   </style>
 </head>
 <body>
-  <h2>Dashboard CRM MADEC - Accès superviseur</h2>
-  <iframe src="https://lookerstudio.google.com/embed/reporting/YOUR_REPORT_ID/page/1M" allowfullscreen></iframe>
+  <h2>Formulaire d'interaction client - Opérateur</h2>
+  <form id="crmForm">
+    <label for="codeClient">Code client</label>
+    <input type="text" id="codeClient" name="codeClient" required>
+
+    <label for="nomClient">Nom du client</label>
+    <input type="text" id="nomClient" name="nomClient" disabled>
+
+    <label for="canal">Canal de contact</label>
+    <select id="canal" name="canal" required>
+      <option value="">--Sélectionner--</option>
+      <option value="Appel">Appel</option>
+      <option value="WhatsApp">WhatsApp</option>
+      <option value="Email">Email</option>
+      <option value="Visite">Visite</option>
+    </select>
+
+    <label for="typeContact">Type de contact</label>
+    <select id="typeContact" name="typeContact" required>
+      <option value="">--Sélectionner--</option>
+      <option value="Entrant">Entrant</option>
+      <option value="Sortant">Sortant</option>
+    </select>
+
+    <label for="motif">Motif</label>
+    <select id="motif" name="motif" required>
+      <option value="Commande">Commande</option>
+      <option value="Information produit">Information produit</option>
+      <option value="Réclamation client">Réclamation client</option>
+      <option value="Rupture ou indisponibilité">Rupture ou indisponibilité</option>
+      <option value="Retard de livraison">Retard de livraison</option>
+      <option value="Retour / litige">Retour / litige</option>
+      <option value="Demande commerciale">Demande commerciale</option>
+      <option value="Autre">Autre</option>
+    </select>
+
+    <label for="commentaire">Commentaire</label>
+    <textarea id="commentaire" name="commentaire" rows="4"></textarea>
+
+    <button type="submit">Enregistrer</button>
+  </form>
+
+  <script>
+    const sheetURL = "https://docs.google.com/spreadsheets/d/1jIRZWacQBnuqfMmlELxSjeRjDY58xghq/gviz/tq?tqx=out:json";
+
+    let referentielClients = {};
+
+    function chargerReferentiel() {
+      fetch(sheetURL)
+        .then(res => res.text())
+        .then(data => {
+          const json = JSON.parse(data.substr(47).slice(0, -2));
+          json.table.rows.forEach(row => {
+            const code = row.c[0]?.v;
+            const nom = row.c[1]?.v;
+            if (code && nom) referentielClients[code] = nom;
+          });
+        });
+    }
+
+    document.getElementById("codeClient").addEventListener("input", function () {
+      const code = this.value.trim();
+      document.getElementById("nomClient").value = referentielClients[code] || "";
+    });
+
+    chargerReferentiel();
+
+    document.querySelector("form").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const payload = {
+        codeClient: document.getElementById("codeClient").value,
+        canal: document.getElementById("canal").value,
+        typeContact: document.getElementById("typeContact").value,
+        motif: document.getElementById("motif").value,
+        commentaire: document.getElementById("commentaire").value,
+        agent: "opérateur"
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbxxlslsKYJAKbgEPubXiocmgZxPl5nI7taapsGq-wahyMHkGrjmVt79MSC7tGoSZ9FO/exec", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.text())
+      .then(data => {
+        alert("✅ Interaction enregistrée !");
+        document.getElementById("crmForm").reset();
+        document.getElementById("nomClient").value = "";
+      })
+      .catch(error => {
+        alert("❌ Erreur : " + error.message);
+      });
+    });
+  </script>
 </body>
 </html>
